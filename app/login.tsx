@@ -127,13 +127,16 @@ const Page = () => {
                 value={password}
                 onChangeText={setPassword}
             />
+
+
           </View>
+
 
           <TouchableOpacity
               style={[
                 defaultStyles.pillButton,
                 emailAddress && password ? styles.enabled : styles.disabled,
-                { marginTop: 20 },
+                { marginTop: 10 },
               ]}
               onPress={onSignInPress}
           >

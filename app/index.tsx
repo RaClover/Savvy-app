@@ -59,7 +59,7 @@ const requestSMSPermission = async () => {
 
 
 const Page = () => {
-  const [assets] = useAssets([require('@/assets/videos/intro3.mp4')]);
+  const [assets] = useAssets([require('@/assets/videos/intro2.mp4')]);
 
   useEffect(() => {
     init();  // Initialize the SQLite database when the component mounts

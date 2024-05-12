@@ -77,61 +77,67 @@ const Page = () => {
     return (
         <KeyboardAvoidingView
             style={{ flex: 1 }}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={keyboardVerticalOffset}>
+            behavior="padding"
+            keyboardVerticalOffset={keyboardVerticalOffset}
+        >
             <View style={defaultStyles.container}>
                 <Text style={defaultStyles.header}>Let's get started!</Text>
                 <Text style={defaultStyles.descriptionText}>
                     Enter your details to create an account.
                 </Text>
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        style={[styles.input, { marginTop: 6 }]}
+                        placeholder="First Name"
+                        placeholderTextColor={Colors.gray}
+                        value={firstName}
+                        onChangeText={(firstName) => setFirstName(firstName)}
+                    />
 
-                <TextInput
-                    style={styles.input}
-                    placeholder="First Name"
-                    placeholderTextColor={Colors.gray}
-                    value={firstName}
-                    onChangeText={(firstName) => setFirstName(firstName)}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Last Name"
-                    placeholderTextColor={Colors.gray}
-                    value={lastName}
-                    onChangeText={(lastName) => setLastName(lastName)}
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Email"
-                    placeholderTextColor={Colors.gray}
-                    value={email}
-                    onChangeText={(email) => setEmailAddress(email)}
-                    keyboardType="email-address"
-                />
-                <TextInput
-                    style={styles.input}
-                    placeholder="Password"
-                    placeholderTextColor={Colors.gray}
-                    value={password}
-                    onChangeText={(password) => setPassword(password)}
-                    secureTextEntry={true}
-                />
+                    <TextInput
+                        style={[styles.input, { marginTop: 8 }]}
+                        placeholder="Last Name"
+                        placeholderTextColor={Colors.gray}
+                        value={lastName}
+                        onChangeText={(lastName) => setLastName(lastName)}
+                    />
+
+                    <TextInput
+                        style={[styles.input, { marginTop: 8 }]}
+                        placeholder="Email"
+                        placeholderTextColor={Colors.gray}
+                        value={email}
+                        onChangeText={(email) => setEmailAddress(email)}
+                        keyboardType="email-address"
+                    />
+
+                    <TextInput
+                        style={[styles.input, { marginTop: 8 }]}
+                        placeholder="Password"
+                        placeholderTextColor={Colors.gray}
+                        secureTextEntry={true}
+                        value={password}
+                        onChangeText={(password) => setPassword(password)}
+                    />
+
+
+                </View>
+
 
                 <TouchableOpacity
                     style={[
                         defaultStyles.pillButton,
                         email && password ? styles.enabled : styles.disabled,
-                        { marginBottom: 20 }
+                        { marginTop: 20 },
                     ]}
                     onPress={onSignup}
-                    disabled={!email || !password || !firstName || !lastName}>
-                    <Text style={defaultStyles.buttonText}>Sign Up</Text>
+                >
+                    <Text style={defaultStyles.buttonText}>Sign In</Text>
                 </TouchableOpacity>
 
-                <Link href="/login" replace asChild>
-                    <TouchableOpacity>
-                        <Text style={defaultStyles.textLink}>Already have an account? Log in</Text>
-                    </TouchableOpacity>
-                </Link>
+                <TouchableOpacity style={{ marginTop: 20 }} onPress={() => router.push('/login')}>
+                    <Text style={{ color: Colors.primary }}>Already have an account? Log in</Text>
+                </TouchableOpacity>
             </View>
         </KeyboardAvoidingView>
     );
@@ -139,17 +145,13 @@ const Page = () => {
 
 const styles = StyleSheet.create({
     inputContainer: {
-        marginVertical: 20,
-        flexDirection: 'row',
+        marginVertical: 0,
     },
     input: {
         backgroundColor: Colors.lightGray,
-        padding: 20,
+        padding: 18,
         borderRadius: 16,
         fontSize: 20,
-        marginBottom: 10,
-        marginRight: 10,
-        flex: 1,
     },
     enabled: {
         backgroundColor: Colors.primary,

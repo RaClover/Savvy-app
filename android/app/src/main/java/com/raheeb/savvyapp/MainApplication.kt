@@ -18,6 +18,10 @@ import com.facebook.soloader.SoLoader
 
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
+import com.raheeb.savvyapp.SmsListenerPackage
+
+
+
 
 class MainApplication : Application(), ReactApplication {
 
@@ -25,9 +29,13 @@ class MainApplication : Application(), ReactApplication {
         this,
         object : DefaultReactNativeHost(this) {
           override fun getPackages(): List<ReactPackage> {
-            // Packages that cannot be autolinked yet can be added manually here, for example:
-            // packages.add(new MyReactNativePackage());
-            return PackageList(this).packages
+          // First, get the original list of packages
+          val originalPackages = PackageList(this@MainApplication).packages
+          // Create a new mutable list from the original list
+          val packages = ArrayList(originalPackages)
+          // Add your custom package
+          packages.add(SmsListenerPackage())
+                return packages
           }
 
           override fun getJSMainModuleName(): String = ".expo/.virtual-metro-entry"

@@ -2,12 +2,11 @@ import { useAuth } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import { MMKV } from 'react-native-mmkv';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const storage = new MMKV({
-  id: 'inactivty-storage',
-});
+
+// AsyncStorage for storage initialization
+const storageKey = 'inactivity-storage';
 
 export const UserInactivityProvider = ({ children }: any) => {
   const appState = useRef(AppState.currentState);
@@ -28,19 +27,20 @@ export const UserInactivityProvider = ({ children }: any) => {
     if (nextAppState === 'background') {
       recordStartTime();
     } else if (nextAppState === 'active' && appState.current.match(/background/)) {
-      const elapsed = Date.now() - (storage.getNumber('startTime') || 0);
+      const elapsed = Date.now() - parseInt(await AsyncStorage.getItem(`${storageKey}:startTime`) || '0');
       console.log('🚀 ~ handleAppStateChange ~ elapsed:', elapsed);
 
-      if (elapsed > 3000 && isSignedIn) {
+      if (elapsed > 8000 && isSignedIn) {
         router.replace('/(authenticated)/(modals)/lock');
       }
     }
     appState.current = nextAppState;
   };
 
-  const recordStartTime = () => {
-    storage.set('startTime', Date.now());
+  const recordStartTime = async () => {
+    await AsyncStorage.setItem(`${storageKey}:startTime`, Date.now().toString());
   };
 
   return children;
 };
+
