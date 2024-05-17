@@ -3,10 +3,8 @@ import { defaultStyles } from '@/constants/Styles';
 import { useAssets } from 'expo-asset';
 import { ResizeMode, Video } from 'expo-av';
 import { Link } from 'expo-router';
-import { View, Text, StyleSheet, Pressable , Alert, PermissionsAndroid , Linking, Button} from 'react-native';
-import init from '../database/db';
-import {useEffect} from "react";
-
+import { View, Text, StyleSheet, Pressable, Alert, PermissionsAndroid, Linking } from 'react-native';
+import { useEffect } from "react";
 
 const openSettings = () => {
   Linking.openSettings().catch(() => {
@@ -55,51 +53,46 @@ const requestSMSPermission = async () => {
   }
 };
 
-
-
-
 const Page = () => {
   const [assets] = useAssets([require('@/assets/videos/intro2.mp4')]);
 
   useEffect(() => {
-    init();  // Initialize the SQLite database when the component mounts
     requestSMSPermission(); // Request SMS permission automatically when the app loads
   }, []);
 
-
   return (
-    <View style={styles.container}>
-      {assets && (
-        <Video
-          resizeMode={ResizeMode.COVER}
-          isMuted
-          isLooping
-          shouldPlay
-          source={{ uri: assets[0].uri }}
-          style={styles.video}
-        />
-      )}
-      <View style={{ marginTop: 80, padding: 20 }}>
-        <Text style={styles.header}>Ready to change the way you money?</Text>
-      </View>
+      <View style={styles.container}>
+        {assets && (
+            <Video
+                resizeMode={ResizeMode.COVER}
+                isMuted
+                isLooping
+                shouldPlay
+                source={{ uri: assets[0].uri }}
+                style={styles.video}
+            />
+        )}
+        <View style={{ marginTop: 80, padding: 20 }}>
+          <Text style={styles.header}>Ready to change the way you money?</Text>
+        </View>
 
-      <View style={styles.buttons}>
-        <View style={[defaultStyles.pillButton, { flex: 1, backgroundColor: Colors.dark }]}>
-          <Link href="/login" asChild>
-            <Pressable>
-              <Text style={{ color: 'white', fontSize: 22, fontWeight: '500' }}>Log in</Text>
-            </Pressable>
-          </Link>
-        </View>
-        <View style={[defaultStyles.pillButton, { flex: 1, backgroundColor: '#fff' }]}>
-          <Link href="/signup" asChild>
-            <Pressable>
-              <Text style={{ fontSize: 22, fontWeight: '500' }}>Sign up</Text>
-            </Pressable>
-          </Link>
+        <View style={styles.buttons}>
+          <View style={[defaultStyles.pillButton, { flex: 1, backgroundColor: Colors.dark }]}>
+            <Link href="/login" asChild>
+              <Pressable>
+                <Text style={{ color: 'white', fontSize: 22, fontWeight: '500' }}>Log in</Text>
+              </Pressable>
+            </Link>
+          </View>
+          <View style={[defaultStyles.pillButton, { flex: 1, backgroundColor: '#fff' }]}>
+            <Link href="/signup" asChild>
+              <Pressable>
+                <Text style={{ fontSize: 22, fontWeight: '500' }}>Sign up</Text>
+              </Pressable>
+            </Link>
+          </View>
         </View>
       </View>
-    </View>
   );
 };
 

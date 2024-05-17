@@ -4,6 +4,7 @@ import { isClerkAPIResponseError, useSignIn, useSignUp } from '@clerk/clerk-expo
 import {Link, useLocalSearchParams, useRouter} from 'expo-router';
 import { Fragment, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
     CodeField,
     Cursor,
@@ -41,6 +42,7 @@ const Page = () => {
                 code,
             });
             await setActive!({ session: signUp!.createdSessionId });
+
         } catch (err) {
             console.log('error', JSON.stringify(err, null, 2));
             if (isClerkAPIResponseError(err)) {

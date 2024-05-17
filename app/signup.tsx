@@ -1,9 +1,10 @@
 import Colors from '@/constants/Colors';
 import { defaultStyles } from '@/constants/Styles';
-import { useSignUp } from '@clerk/clerk-expo';
+import { useSignUp , useUser} from '@clerk/clerk-expo';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { insertUser } from '@/database/db';
+import { supabase } from '@/utils/supabase';
 import {
     View,
     Text,
@@ -14,6 +15,7 @@ import {
     Platform,
     Alert,
 } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const Page = () => {
@@ -27,27 +29,6 @@ const Page = () => {
     // Define keyboardVerticalOffset - adjust this value based on your UI needs
     const keyboardVerticalOffset = Platform.OS === 'ios' ? 60 : 0;
 
-    // const onSignup = async () => {
-    //     try {
-    //         const createUserResponse = await signUp!.create({
-    //             firstName,
-    //             lastName,
-    //             emailAddress: email,
-    //             password
-    //         });
-    //         console.log("Create user response:", createUserResponse);  // Log user creation response
-    //
-    //         const prepareVerificationResponse = await signUp!.prepareEmailAddressVerification();
-    //         console.log("Prepare email verification response:", prepareVerificationResponse);  // Log preparation response
-    //
-    //         // Navigate to the email verification page
-    //         router.push({ pathname: '/verify/[email]', params: { email } });
-    //     } catch (error) {
-    //         console.error('Error signing up:', error);
-    //         // Alert user about the signup error
-    //         Alert.alert('Signup Error', 'An error occurred while signing up. Please try again.');
-    //     }
-    // };
 
     const onSignup = async () => {
         try {
@@ -57,11 +38,22 @@ const Page = () => {
                 emailAddress: email,
                 password
             });
-            console.log("Create user response:", createUserResponse);  // Log user creation response
+
+            const creationTime = new Date().toISOString();
+            await AsyncStorage.setItem('accountCreationTime', creationTime);
 
             // Await the insert user function and handle separately
-            await insertUser(firstName, lastName, email);
-            console.log('User has been saved to the SQL database');
+            const { data, error } = await supabase
+                .from('users')
+                .insert([
+                    { first_name: firstName, last_name: lastName, email: email },
+                ])
+                .select();
+            if (error) throw error;
+            const userId = data[0].id; // Fetch the ID of the inserted user
+            await AsyncStorage.setItem('supabaseUserId', userId.toString()); // Store the Supabase user ID
+
+            console.log('User has been saved to the supabase: ', userId);
 
             const prepareVerificationResponse = await signUp!.prepareEmailAddressVerification();
             console.log("Prepare email verification response:", prepareVerificationResponse);  // Log preparation response
@@ -73,6 +65,7 @@ const Page = () => {
             Alert.alert('Signup Error', 'An error occurred while signing up. Please try again.');
         }
     };
+
 
     return (
         <KeyboardAvoidingView

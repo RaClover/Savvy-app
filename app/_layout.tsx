@@ -9,11 +9,16 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { TouchableOpacity, Text, View, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 import * as SecureStore from 'expo-secure-store';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { UserInactivityProvider } from '@/context/UserInactivity';
+import { registerBackgroundFetchAsync } from '@/tasks/backgroundFetchTasks';
+
 const queryClient = new QueryClient();
+const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
 
 // Cache the Clerk JWT
 const tokenCache = {
@@ -37,9 +42,6 @@ export {
     // Catch any errors thrown by the Layout component.
     ErrorBoundary,
 } from 'expo-router';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
 
 const InitialLayout = () => {
     const [loaded, error] = useFonts({
@@ -74,30 +76,9 @@ const InitialLayout = () => {
         }
     }, [isSignedIn]);
 
-
-    // useEffect(() => {
-    //     console.log('Application state:', {
-    //         isLoaded,
-    //         isSignedIn,
-    //         currentSegment: segments.length > 0 ? segments[0] : 'None'
-    //     });
-    //
-    //     if (!isLoaded) {
-    //         console.log('Auth state not loaded yet.');
-    //         return; // Only return here if the authentication state isn't loaded yet
-    //     }
-    //
-    //     if (isSignedIn && segments.length > 0 && segments[0] !== '(authenticated)') {
-    //         console.log('User is signed in but not in authenticated segment, redirecting...');
-    //         router.replace('/(authenticated)/(tabs)/home');
-    //     } else if (!isSignedIn && segments.length > 0 && segments[0] === '(authenticated)') {
-    //         console.log('User is not signed in but in authenticated segment, redirecting...');
-    //         router.replace('/');
-    //     } else {
-    //         console.log('No redirection required.');
-    //     }
-    // }, [isSignedIn, isLoaded, segments]);
-
+    useEffect(() => {
+        registerBackgroundFetchAsync(); // Register background fetch task
+    }, []);
 
     if (!loaded || !isLoaded) {
         return (
@@ -200,7 +181,7 @@ const InitialLayout = () => {
                     headerTransparent: true,
                     headerLeft: () => (
                         <TouchableOpacity onPress={router.back}>
-                            <Ionicons name="close-outline" size={34} color={'#fff'} />
+                            <Ionicons name="close-outline" size={34} color={'rgba(17,17,17,0.85)'} />
                         </TouchableOpacity>
                     ),
                 }}

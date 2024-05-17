@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput } from 'reac
 import { BlurView } from 'expo-blur';
 import Colors from '@/constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 
 const Page = () => {
   const { user } = useUser();
@@ -44,10 +45,10 @@ const Page = () => {
 
   return (
       <BlurView
-          intensity={80}
-          tint={'dark'}
-          style={{ flex: 1, paddingTop: 100, backgroundColor: 'rgba(0,0,0,0.6)' }}>
-        <View style={{ alignItems: 'center' }}>
+          intensity={100}
+          tint={'extraLight'}
+          style={{ flex: 1, paddingTop: 100, backgroundColor: 'rgb(255,255,255)' }}>
+        <View style={{ alignItems: 'center',}}>
           <TouchableOpacity onPress={onCaptureImage} style={styles.captureBtn}>
             {user?.imageUrl && <Image source={{ uri: user?.imageUrl }} style={styles.avatar} />}
           </TouchableOpacity>
@@ -55,11 +56,11 @@ const Page = () => {
           <View style={{ flexDirection: 'row', gap: 6 }}>
             {!edit && (
                 <View style={styles.editRow}>
-                  <Text style={{ fontSize: 26, color: '#fff' }}>
+                  <Text style={{ fontSize: 26, color: 'rgba(17,17,17,0.85)' }}>
                     {firstName} {lastName}
                   </Text>
                   <TouchableOpacity onPress={() => setEdit(true)}>
-                    <Text style={{ color: '#fff', fontSize: 24 }}>Edit</Text>
+                    <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 24 }}>Edit</Text>
                   </TouchableOpacity>
                 </View>
             )}
@@ -78,7 +79,7 @@ const Page = () => {
                       style={[styles.inputField]}
                   />
                   <TouchableOpacity onPress={onSaveUser}>
-                    <Text style={{ color: '#fff', fontSize: 24 }}>Save</Text>
+                    <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 24 }}>Save</Text>
                   </TouchableOpacity>
                 </View>
             )}
@@ -87,24 +88,33 @@ const Page = () => {
 
         <View style={styles.actions}>
           <TouchableOpacity style={styles.btn} onPress={() => signOut()}>
-            <Text style={{ color: '#fff', fontSize: 18 }}>Log out</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btn}>
-            <Text style={{ color: '#fff', fontSize: 18 }}>Account</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btn}>
-            <Text style={{ color: '#fff', fontSize: 18 }}>Learn</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btn}>
-            <Text style={{ color: '#fff', fontSize: 18, flex: 1 }}>Inbox</Text>
+            <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 18 , flex: 1}}>Log out</Text>
             <View
                 style={{
-                  backgroundColor: Colors.primary,
+
                   paddingHorizontal: 10,
                   borderRadius: 10,
                   justifyContent: 'center',
                 }}>
-              <Text style={{ color: '#fff', fontSize: 12 }}>14</Text>
+              <Ionicons name="log-out-sharp" size={25} color="#473c3c" />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.btn}>
+            <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 18 }}>Account</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.btn}>
+            <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 18 }}>Learn</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.btn}>
+            <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 18, flex: 1 }}>Inbox</Text>
+            <View
+                style={{
+
+                  paddingHorizontal: 10,
+                  borderRadius: 10,
+                  justifyContent: 'center',
+                }}>
+              <Ionicons name="mail" size={25} color="#473c3c" />
             </View>
           </TouchableOpacity>
         </View>
@@ -145,7 +155,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   actions: {
-    backgroundColor: 'rgba(243,240,240,0.24)',
+    backgroundColor: 'rgba(17,17,17,0.06)',
     borderRadius: 16,
     gap: 0,
     margin: 20,

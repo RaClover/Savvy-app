@@ -6,6 +6,8 @@ import { isClerkAPIResponseError, useSignIn } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
+import { supabase } from '@/utils/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -31,37 +33,6 @@ const Page = () => {
   const router = useRouter();
   const { signIn, setActive, isLoaded } = useSignIn();
 
-  // const onSignInPress = async () => {
-  //   if (!isLoaded) {
-  //     return;
-  //   }
-  //
-  //   try {
-  //     const completeSignIn = await signIn.create({
-  //       identifier: emailAddress,
-  //       password,
-  //     });
-  //     // This is an important step,
-  //     // This indicates the user is signed in
-  //     await setActive({ session: completeSignIn.createdSessionId });
-  //
-  //     // Redirect to email verification page
-  //     router.push({
-  //       pathname: '/verify/[email]',
-  //       params: { email: emailAddress },
-  //     });
-  //   } catch (err) {
-  //     console.error('Error during sign in:', err);
-  //     if (isClerkAPIResponseError(err)) {
-  //       // Handle Clerk API errors if needed
-  //       Alert.alert('Error', err.message);
-  //     } else {
-  //       Alert.alert('Error', 'An unexpected error occurred. Please try again later.');
-  //     }
-  //   }
-  // };
-
-
   const onSignInPress = async () => {
     try {
       const completeSignIn = await signIn!.create({
@@ -73,6 +44,21 @@ const Page = () => {
         case 'complete':
           // This indicates the user is fully signed in
           await setActive!({ session: completeSignIn.createdSessionId });
+
+          // Fetch the user data from Supabase
+          const { data, error } = await supabase
+              .from('users')
+              .select('id')
+              .eq('email', emailAddress)
+              .single();
+          if (error || !data) {
+            console.error('Error fetching user data:', error);
+            Alert.alert('Login Error', 'Failed to fetch user data.');
+            return;
+          }
+
+          const supabaseUserId = data.id;
+          await AsyncStorage.setItem('supabaseUserId', supabaseUserId.toString());
           router.replace('/(authenticated)/(tabs)/home');
           break;
 
