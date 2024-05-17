@@ -1,8 +1,10 @@
 package com.raheeb.savvyapp
 
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.content.IntentFilter
 import android.os.Bundle
 import android.telephony.SmsMessage
@@ -15,10 +17,9 @@ import com.facebook.react.bridge.WritableMap
 
 class SmsListenerModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
-    private var accountCreationTimeMillis: Long = 0
-
     init {
         registerSMSReceiver()
+        startForegroundService()
     }
 
     override fun getName(): String {
@@ -37,7 +38,7 @@ class SmsListenerModule(private val reactContext: ReactApplicationContext) : Rea
                     val pdus = it["pdus"] as Array<*>
                     pdus.forEach { pdu ->
                         val sms = SmsMessage.createFromPdu(pdu as ByteArray)
-                        if (isValidBankNumber(sms.originatingAddress) && sms.timestampMillis > accountCreationTimeMillis) {
+                        if (isValidBankNumber(sms.originatingAddress)) {
                             val params = Arguments.createMap().apply {
                                 putString("messageBody", sms.messageBody)
                                 putString("senderPhoneNumber", sms.originatingAddress)
@@ -54,13 +55,32 @@ class SmsListenerModule(private val reactContext: ReactApplicationContext) : Rea
     }
 
     private fun isValidBankNumber(phoneNumber: String?): Boolean {
-        val bankNumbers = listOf("Bank", "bank", "SberBank", "Sber", "Tinkoff", "VTB", "The bank", "TheBank", "900") // Add your actual bank phone numbers or patterns
+        val bankNumbers = listOf("Bank", "bank", "SberBank", "Sber", "Tinkoff", "VTB", "TheBank", "900")
         return bankNumbers.any { phoneNumber != null && phoneNumber.contains(it) }
     }
 
     @ReactMethod
-    fun startListeningToSMS(accountCreationTime: Double) {
-        this.accountCreationTimeMillis = accountCreationTime.toLong()
+    fun startForegroundService() {
+        val serviceIntent = Intent(reactContext, SmsForegroundService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            reactContext.startForegroundService(serviceIntent)
+        } else {
+            reactContext.startService(serviceIntent)
+        }
+    }
+
+    @ReactMethod
+    fun startListeningToSMS() {
         registerSMSReceiver()
+    }
+
+    @ReactMethod
+    fun addListener(eventName: String) {
+        // empty fun
+    }
+
+    @ReactMethod
+    fun removeListeners(count: Int) {
+        // empty fun
     }
 }
