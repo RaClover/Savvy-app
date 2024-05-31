@@ -41,6 +41,7 @@ const Page = () => {
 
             const creationTime = new Date().toISOString();
             await AsyncStorage.setItem('accountCreationTime', creationTime);
+            await AsyncStorage.setItem('isFirstTimeUser', 'true');
 
             // Await the insert user function and handle separately
             const { data, error } = await supabase

@@ -1,10 +1,13 @@
+// account.tsx
+
 import { useAuth, useUser } from '@clerk/clerk-expo';
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
 import { BlurView } from 'expo-blur';
 import Colors from '@/constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import SenderListManager from '@/components/SenderListManager';  // Import the SenderListManager component
 
 const Page = () => {
   const { user } = useUser();
@@ -47,77 +50,84 @@ const Page = () => {
       <BlurView
           intensity={100}
           tint={'extraLight'}
-          style={{ flex: 1, paddingTop: 100, backgroundColor: 'rgb(255,255,255)' }}>
-        <View style={{ alignItems: 'center',}}>
-          <TouchableOpacity onPress={onCaptureImage} style={styles.captureBtn}>
-            {user?.imageUrl && <Image source={{ uri: user?.imageUrl }} style={styles.avatar} />}
-          </TouchableOpacity>
+          style={{ flex: 1, paddingTop: 100, backgroundColor: 'rgb(255,255,255)' }}
+      >
+        <ScrollView contentContainerStyle={{ padding: 20 }}>
+          <View style={{ alignItems: 'center' }}>
+            <TouchableOpacity onPress={onCaptureImage} style={styles.captureBtn}>
+              {user?.imageUrl && <Image source={{ uri: user?.imageUrl }} style={styles.avatar} />}
+            </TouchableOpacity>
 
-          <View style={{ flexDirection: 'row', gap: 6 }}>
-            {!edit && (
-                <View style={styles.editRow}>
-                  <Text style={{ fontSize: 26, color: 'rgba(17,17,17,0.85)' }}>
-                    {firstName} {lastName}
-                  </Text>
-                  <TouchableOpacity onPress={() => setEdit(true)}>
-                    <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 24 }}>Edit</Text>
-                  </TouchableOpacity>
-                </View>
-            )}
-            {edit && (
-                <View style={styles.editRow}>
-                  <TextInput
-                      placeholder="First Name"
-                      value={firstName || ''}
-                      onChangeText={setFirstName}
-                      style={[styles.inputField]}
-                  />
-                  <TextInput
-                      placeholder="Last Name"
-                      value={lastName || ''}
-                      onChangeText={setLastName}
-                      style={[styles.inputField]}
-                  />
-                  <TouchableOpacity onPress={onSaveUser}>
-                    <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 24 }}>Save</Text>
-                  </TouchableOpacity>
-                </View>
-            )}
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              {!edit && (
+                  <View style={styles.editRow}>
+                    <Text style={{ fontSize: 26, color: 'rgba(17,17,17,0.85)' }}>
+                      {firstName} {lastName}
+                    </Text>
+                    <TouchableOpacity onPress={() => setEdit(true)}>
+                      <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 24 }}>Edit</Text>
+                    </TouchableOpacity>
+                  </View>
+              )}
+              {edit && (
+                  <View style={styles.editRow}>
+                    <TextInput
+                        placeholder="First Name"
+                        value={firstName || ''}
+                        onChangeText={setFirstName}
+                        style={[styles.inputField]}
+                    />
+                    <TextInput
+                        placeholder="Last Name"
+                        value={lastName || ''}
+                        onChangeText={setLastName}
+                        style={[styles.inputField]}
+                    />
+                    <TouchableOpacity onPress={onSaveUser}>
+                      <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 24 }}>Save</Text>
+                    </TouchableOpacity>
+                  </View>
+              )}
+            </View>
           </View>
-        </View>
 
-        <View style={styles.actions}>
-          <TouchableOpacity style={styles.btn} onPress={() => signOut()}>
-            <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 18 , flex: 1}}>Log out</Text>
-            <View
-                style={{
+          <View style={styles.actions}>
+            <TouchableOpacity style={styles.btn} onPress={() => signOut()}>
+              <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 18, flex: 1 }}>Log out</Text>
+              <View
+                  style={{
+                    paddingHorizontal: 10,
+                    borderRadius: 10,
+                    justifyContent: 'center',
+                  }}
+              >
+                <Ionicons name="log-out-sharp" size={25} color="#473c3c" />
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.btn}>
+              <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 18 }}>Account</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.btn}>
+              <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 18 }}>Learn</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.btn}>
+              <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 18, flex: 1 }}>Inbox</Text>
+              <View
+                  style={{
+                    paddingHorizontal: 10,
+                    borderRadius: 10,
+                    justifyContent: 'center',
+                  }}
+              >
+                <Ionicons name="mail" size={25} color="#473c3c" />
+              </View>
+            </TouchableOpacity>
+          </View>
 
-                  paddingHorizontal: 10,
-                  borderRadius: 10,
-                  justifyContent: 'center',
-                }}>
-              <Ionicons name="log-out-sharp" size={25} color="#473c3c" />
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btn}>
-            <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 18 }}>Account</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btn}>
-            <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 18 }}>Learn</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btn}>
-            <Text style={{ color: 'rgba(17,17,17,0.85)', fontSize: 18, flex: 1 }}>Inbox</Text>
-            <View
-                style={{
+          {/* Add the SenderListManager component here */}
+          <SenderListManager />
 
-                  paddingHorizontal: 10,
-                  borderRadius: 10,
-                  justifyContent: 'center',
-                }}>
-              <Ionicons name="mail" size={25} color="#473c3c" />
-            </View>
-          </TouchableOpacity>
-        </View>
+        </ScrollView>
       </BlurView>
   );
 };
@@ -166,4 +176,5 @@ const styles = StyleSheet.create({
     gap: 20,
   },
 });
+
 export default Page;

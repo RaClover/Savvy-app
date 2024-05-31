@@ -13,7 +13,7 @@ interface CreditCardProps {
     style?: StyleProp<ViewStyle>;
     textColor?: string;
     bgColor?: string;
-    bank_name: string
+    bank_name: string;
     color: string;
 }
 
@@ -30,10 +30,11 @@ export default function CreditCard({
     const dotStyle = [styles.dot, { backgroundColor: textColor }];
     return (
         <View style={[styles.container, { backgroundColor: color }, style]}>
-            <View style={[styles.bgCircle, styles.rightBgCircle]} />
-            <View style={[styles.bgCircle, styles.bottomBgCircle]} />
+            <View style={[styles.bgCircle, styles.rightBgCircle, { backgroundColor: '#d52d09' }]} />
+            <View style={[styles.bgCircle, styles.bottomBgCircle, { backgroundColor: '#0ef336' }]} />
+            <View style={[styles.bgCircle, styles.leftBgCircle, { backgroundColor: '#3357FF' }]} />
             <View style={styles.balanceContainer}>
-                <Text style={[styles.text, { color: textColor , fontSize: 20}]}>{balance.toFixed(2)} ₽</Text>
+                <Text style={[styles.text, { color: textColor, fontSize: 20 }]}>{balance.toFixed(2)} ₽</Text>
             </View>
             <View style={styles.cardNumberContainer}>
                 <View style={styles.cardNumberPart}>
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
         padding: 24,
         paddingTop: 100,
         borderRadius: 12,
-        width: 320,
+        width: 340,
         position: "relative",
     },
     balanceContainer: {
@@ -102,18 +103,21 @@ const styles = StyleSheet.create({
     },
     bgCircle: {
         position: "absolute",
-        backgroundColor: "white",
-        opacity: 0.05,
+        opacity: 0.1,
         height: circleSize,
         width: circleSize,
-        borderRadius: circleSize,
+        borderRadius: circleSize / 2,
     },
     rightBgCircle: {
-        top: (-1 * circleSize) / 4,
-        right: (-1 * circleSize) / 2,
+        top: -circleSize / 4,
+        right: -circleSize / 2,
     },
     bottomBgCircle: {
-        bottom: (-1 * circleSize) / 2,
-        left: (0 * (-1 * circleSize)) / 2,
+        bottom: -circleSize / 2,
+        left: 0,
+    },
+    leftBgCircle: {
+        top: circleSize / 3,
+        left: -circleSize / 2,
     },
 });

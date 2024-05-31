@@ -1,17 +1,23 @@
-// home.tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import Animated, { interpolate, useAnimatedStyle, runOnJS, SharedValue } from 'react-native-reanimated';
 import Carousel from 'react-native-reanimated-carousel';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useHeaderHeight } from '@react-navigation/elements';
-import { supabase } from '@/utils/supabase';
+import {
+  fetchTransactions,
+  fetchTotalBalance,
+  subscribeToTransactionChanges,
+  subscribeToCardBalanceChanges,
+  supabase
+} from '@/utils/supabase';
 import WidgetList from '@/components/SortableList/WidgetList';
 import Colors from '@/constants/Colors';
 import { defaultStyles } from '@/constants/Styles';
 import { Ionicons } from '@expo/vector-icons';
 import CreditCard from "@/components/CreditCard";
-import { useAuth, useUser } from '@clerk/clerk-expo';
+import { useUser } from '@clerk/clerk-expo';
+import SenderListModal from '@/components/SenderListModal';
 
 interface Transaction {
   id: string;
@@ -20,7 +26,7 @@ interface Transaction {
   currency: string;
   merchant: string;
   category: string;
-  time: string; // or number depending on your schema
+  time: string;
   created_at: string;
 }
 
@@ -33,9 +39,6 @@ interface Card {
 
 const PAGE_WIDTH = 340;
 const PAGE_HEIGHT = 180;
-
-// Define an array of colors
-const cardColors = ['#FFC107', '#03A9F4', '#4CAF50', '#E91E63', '#FF9800'];
 
 function withAnchorPoint(
     transform: any,
@@ -65,6 +68,7 @@ const Page = () => {
   const [supabaseUserId, setSupabaseUserId] = useState<string | null>(null);
   const [totalBalance, setTotalBalance] = useState<number>(0);
   const [cards, setCards] = useState<Card[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
   const { user } = useUser();
 
   useEffect(() => {
@@ -75,69 +79,38 @@ const Page = () => {
     getUserId();
   }, []);
 
-  const fetchTransactions = async (userId: string) => {
-    const { data, error } = await supabase
-        .from('transactions')
-        .select(`
-        id, transaction_type, amount, currency, merchant, category, time, created_at,
-        bank_cards!inner(user_id)
-      `)
-        .eq('bank_cards.user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(8);
-    if (error) {
-      console.error('Error fetching transactions:', error);
-    } else {
-      console.log('Fetched transactions:', data);
-      setTransactions(data as Transaction[]);
-    }
-  };
-
-  const fetchTotalBalance = async (userId: string) => {
-    const { data, error } = await supabase
-        .from('bank_cards')
-        .select('current_balance, card_number, bank_name')
-        .eq('user_id', userId);
-    if (error) {
-      console.error('Error fetching card balances:', error);
-    } else {
-      console.log('Fetched card balances:', data);
-      setCards(data as Card[]);
-      const total = data.reduce((sum: number, card: Card) => sum + (card.current_balance ?? 0), 0);
-      setTotalBalance(total);
-    }
-  };
+  useEffect(() => {
+    const checkFirstTimeUser = async () => {
+      const isFirstTime = await AsyncStorage.getItem('isFirstTimeUser');
+      console.log('isFirstTimeUser:', isFirstTime);
+      if (isFirstTime !== 'false') {
+        console.log('Setting modal visible');
+        setModalVisible(true);
+        await AsyncStorage.setItem('isFirstTimeUser', 'false');
+      }
+    };
+    checkFirstTimeUser();
+  }, []);
 
   useEffect(() => {
     if (supabaseUserId) {
-      fetchTransactions(supabaseUserId);
-      fetchTotalBalance(supabaseUserId);
+      (async () => {
+        const transactions = await fetchTransactions(supabaseUserId);
+        setTransactions(transactions);
+      })();
 
-      const transactionChannel = supabase
-          .channel('public:transactions')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'transactions' }, (payload: { new: Transaction }) => {
-            runOnJS(() => {
-              setTransactions((prevTransactions) => {
-                const updatedTransactions = [payload.new, ...prevTransactions];
-                return updatedTransactions.slice(0, 8);
-              });
-            });
-          })
-          .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'transactions' }, (payload: { old: { id: string } }) => {
-            runOnJS(() => {
-              setTransactions((prevTransactions) => {
-                return prevTransactions.filter(transaction => transaction.id !== payload.old.id);
-              });
-            });
-          })
-          .subscribe();
+      (async () => {
+        const { cards, total } = await fetchTotalBalance(supabaseUserId);
+        setCards(cards);
+        setTotalBalance(total);
+      })();
 
-      const cardChannel = supabase
-          .channel('public:bank_cards')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'bank_cards' }, () => {
-            fetchTotalBalance(supabaseUserId);
-          })
-          .subscribe();
+      const transactionChannel = subscribeToTransactionChanges(supabaseUserId, setTransactions);
+      const cardChannel = subscribeToCardBalanceChanges(supabaseUserId, async () => {
+        const { cards, total } = await fetchTotalBalance(supabaseUserId);
+        setCards(cards);
+        setTotalBalance(total);
+      });
 
       return () => {
         supabase.removeChannel(transactionChannel);
@@ -163,11 +136,11 @@ const Page = () => {
 
   const CardComponent = ({
                            card,
-                           index, // Add index to the props
+                           index,
                            animationValue,
                          }: {
     card: Card;
-    index: number; // Add index type
+    index: number;
     animationValue: SharedValue<number>;
   }) => {
     const WIDTH = PAGE_WIDTH / 1.5;
@@ -244,7 +217,7 @@ const Page = () => {
       };
     }, [card.id]);
 
-    const cardColor = cardColors[index % cardColors.length]; // Determine color based on index
+    const cardColor = Colors.cardColors[index % Colors.cardColors.length];
 
     return (
         <Animated.View
@@ -257,7 +230,7 @@ const Page = () => {
           <Animated.View
               style={[
                 {
-                  backgroundColor: cardColor, // Use cardColor here
+                  backgroundColor: cardColor,
                   alignSelf: "center",
                   justifyContent: "center",
                   alignItems: "center",
@@ -282,7 +255,7 @@ const Page = () => {
                 suffix={card.card_number ?? "0000"}
                 balance={card.current_balance ?? 0}
                 bank_name={card.bank_name ?? "Unknown"}
-                color={cardColor} // Pass cardColor to CreditCard component
+                color={cardColor}
             />
           </Animated.View>
 
@@ -345,7 +318,7 @@ const Page = () => {
                       suffix={cards[0].card_number ?? "0000"}
                       balance={cards[0].current_balance ?? 0}
                       bank_name={cards[0].bank_name ?? "Unknown"}
-                      color={cardColors[0]} // Use first color for single card
+                      color={Colors.cardColors[0]}
                   />
               )
           )}
@@ -387,6 +360,7 @@ const Page = () => {
         </View>
         <Text style={defaultStyles.sectionHeader}>Widgets</Text>
         <WidgetList />
+        <SenderListModal visible={modalVisible} onClose={() => setModalVisible(false)} />
       </ScrollView>
   );
 };

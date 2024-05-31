@@ -35,8 +35,8 @@ const Tile = ({ id }: TileProps) => {
         <Text style={{ color: Colors.gray, fontWeight: '500', fontSize: 16 }}>
           Spent this month
         </Text>
-        <Text style={{ color: Colors.dark, fontWeight: 'bold', fontSize: 26, paddingTop: 10 }}>
-          1024€
+        <Text style={{ color: Colors.gray, fontWeight: 'bold', fontSize: 26, paddingTop: 10 }}>
+          11415 ₽
         </Text>
       </View>
     );

@@ -8,6 +8,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import android.util.Log
+
 
 class SmsForegroundService : Service() {
 
@@ -15,6 +17,7 @@ class SmsForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        Log.d("SmsForegroundService", "Foreground service created")
         createNotificationChannel()
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("SMS Service")
@@ -22,9 +25,11 @@ class SmsForegroundService : Service() {
             .setSmallIcon(R.mipmap.ic_launcher_round) // Using launcher icon for notification
             .build()
         startForeground(1, notification)
+        Log.d("SmsForegroundService", "Foreground service started")
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d("SmsForegroundService", "onStartCommand called")
         // Additional logic to handle new intents or commands can be implemented here
         return START_STICKY
     }

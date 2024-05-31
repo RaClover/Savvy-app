@@ -49,7 +49,7 @@ const CustomHeader = () => {
 
         </View>
         <View style={styles.circle}>
-          <Link href={'/(authenticated)/(modals)/account'} asChild>
+          <Link href={'/(authenticated)/(modals)/statistics'} asChild>
           <TouchableOpacity
               style={{
                 width: 40,

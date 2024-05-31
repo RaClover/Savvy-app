@@ -186,6 +186,21 @@ const InitialLayout = () => {
                     ),
                 }}
             />
+
+            <Stack.Screen
+                name="(authenticated)/(modals)/statistics"
+                options={{
+                    presentation: 'transparentModal',
+                    animation: 'fade',
+                    title: '',
+                    headerTransparent: true,
+                    headerLeft: () => (
+                        <TouchableOpacity onPress={router.back}>
+                            <Ionicons name="arrow-back" size={34} color={'rgba(17,17,17,0.85)'} />
+                        </TouchableOpacity>
+                    ),
+                }}
+            />
         </Stack>
     );
 };

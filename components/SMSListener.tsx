@@ -43,7 +43,7 @@ const requestSMSPermission = async () => {
     return false;
 };
 
-const handleReceivedSMS = async (sms) => {
+const handleReceivedSMS = async (sms: { messageBody: any; senderPhoneNumber: any; timestamp: string | number | Date; }) => {
     console.log('Received SMS:', sms);
 
     const lastProcessedSMS = await AsyncStorage.getItem('lastProcessedSMS');
@@ -77,6 +77,7 @@ const handleReceivedSMS = async (sms) => {
                 .from('bank_cards')
                 .select('id, current_balance')
                 .eq('card_number', card)
+                .eq('bank_name', sms.senderPhoneNumber)
                 .eq('user_id', userId)
                 .single();
 
@@ -159,6 +160,7 @@ const SMSListener = () => {
                 SmsListenerModule.startForegroundService();
                 eventEmitter.current = new NativeEventEmitter(SmsListenerModule);
                 subscription.current = eventEmitter.current.addListener('onSMSReceived', handleReceivedSMS);
+                console.log("SMS Listener initialized");
             }
         };
 

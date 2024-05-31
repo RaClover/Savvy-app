@@ -11,13 +11,18 @@ import android.telephony.SmsMessage
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.modules.core.DeviceEventManagerModule
-import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.WritableMap
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.modules.core.DeviceEventManagerModule
+import android.util.Log
 
 class SmsListenerModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
+    private var senderList: List<String> = listOf()
+
     init {
+        Log.d("SmsListenerModule", "Initializing SMS Listener")
         registerSMSReceiver()
         startForegroundService()
     }
@@ -33,11 +38,13 @@ class SmsListenerModule(private val reactContext: ReactApplicationContext) : Rea
     private fun registerSMSReceiver() {
         val smsReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
+                Log.d("SmsListenerModule", "SMS received")
                 val extras = intent.extras
                 extras?.let {
                     val pdus = it["pdus"] as Array<*>
                     pdus.forEach { pdu ->
                         val sms = SmsMessage.createFromPdu(pdu as ByteArray)
+                        Log.d("SmsListenerModule", "SMS from: ${sms.originatingAddress}, body: ${sms.messageBody}")
                         if (isValidBankNumber(sms.originatingAddress)) {
                             val params = Arguments.createMap().apply {
                                 putString("messageBody", sms.messageBody)
@@ -55,12 +62,12 @@ class SmsListenerModule(private val reactContext: ReactApplicationContext) : Rea
     }
 
     private fun isValidBankNumber(phoneNumber: String?): Boolean {
-        val bankNumbers = listOf("Bank", "bank", "SberBank", "Sber", "Tinkoff", "VTB", "TheBank", "900")
-        return bankNumbers.any { phoneNumber != null && phoneNumber.contains(it) }
+        return senderList.any { phoneNumber != null && phoneNumber.contains(it, ignoreCase = true) }
     }
 
     @ReactMethod
     fun startForegroundService() {
+        Log.d("SmsListenerModule", "Starting foreground service")
         val serviceIntent = Intent(reactContext, SmsForegroundService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             reactContext.startForegroundService(serviceIntent)
@@ -71,16 +78,24 @@ class SmsListenerModule(private val reactContext: ReactApplicationContext) : Rea
 
     @ReactMethod
     fun startListeningToSMS() {
+        Log.d("SmsListenerModule", "startListeningToSMS called")
         registerSMSReceiver()
     }
 
     @ReactMethod
+    fun setSenderList(senders: ReadableArray) {
+        senderList = senders.toArrayList().map { it.toString() }
+        Log.d("SmsListenerModule", "Sender list updated: $senderList")
+    }
+
+    @ReactMethod
     fun addListener(eventName: String) {
-        // empty fun
+        Log.d("SmsListenerModule", "addListener called")
+        // empty function
     }
 
     @ReactMethod
     fun removeListeners(count: Int) {
-        // empty fun
+        // empty function
     }
 }
